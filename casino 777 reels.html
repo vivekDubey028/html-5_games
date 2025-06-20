@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino 777 - Slot Machine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0f1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .casino-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 150, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-icon {
+            font-size: 4rem;
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px #ffd700,
+                0 0 20px #ffd700;
+            margin-bottom: 20px;
+            animation: pulse777 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse777 {
+            0% { transform: scale(1); text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
+            50% { transform: scale(1.1); text-shadow: 0 0 15px #ffd700, 0 0 25px #ffd700; }
+            100% { transform: scale(1); text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #ffd700;
+        }
+
+        .loader-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, #ffd700, transparent);
+            animation: loadBar 1.5s linear infinite;
+        }
+
+        @keyframes loadBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        .slot-machine {
+            background: linear-gradient(145deg, #2c2c54, #1a1a2e);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 3px solid #ffd700;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        .slot-machine::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b, #4ecdc4, #45b7d1, #ffd700);
+            border-radius: 25px;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .title {
+            text-align: center;
+            color: #ffd700;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 
+                0 0 10px #ffd700,
+                0 0 20px #ffd700,
+                0 0 30px #ffd700;
+            margin-bottom: 20px;
+            animation: titlePulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            from { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700; }
+            to { text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffd700; }
+        }
+
+        .reels-container {
+            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 3px solid #333;
+            box-shadow: 
+                inset 0 5px 15px rgba(0, 0, 0, 0.5),
+                inset 0 -5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .reels {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .reel {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border-radius: 12px;
+            border: 3px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 
+                inset 0 3px 10px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 10px rgba(0, 0, 0, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            perspective: 1000px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .reel:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                inset 0 3px 10px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 10px rgba(0, 0, 0, 0.4),
+                0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .reel.spinning {
+            animation: spin 0.08s linear infinite, blur 0.5s ease-in-out;
+        }
+
+        @keyframes spin {
+            0% { transform: rotateX(0deg); }
+            100% { transform: rotateX(360deg); }
+        }
+
+        @keyframes blur {
+            0%, 100% { filter: blur(0px); }
+            50% { filter: blur(2px); }
+        }
+
+        .reel.winning {
+            animation: winPulse 0.5s ease-in-out infinite alternate;
+            box-shadow: 
+                0 0 25px #ffd700,
+                inset 0 3px 10px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes winPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            gap: 20px;
+        }
+
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #ffd700;
+            font-weight: bold;
+            border: 2px solid #ffd700;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            margin-top: -10px;
+        }
+
+        .bet-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bet-btn {
+            background: linear-gradient(145deg, #4ecdc4, #45b7d1);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .bet-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(78, 205, 196, 0.5);
+        }
+
+        .bet-btn.active {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            color: #333;
+            transform: translateY(-1px);
+        }
+
+        .spin-btn, .auto-spin-btn {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 12px rgba(255, 107, 107, 0.4);
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .auto-spin-btn.active {
+            background: linear-gradient(145deg, #4ecdc4, #45b7d1);
+        }
+
+        .spin-btn:hover:not(:disabled), .auto-spin-btn:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .spin-btn:disabled, .auto-spin-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .win-message {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .win-message.big-win {
+            color: #ffd700;
+            text-shadow: 0 0 12px #ffd700;
+            animation: bigWinAnimation 1s ease-in-out infinite alternate;
+        }
+        .button-group {
+            margin-top: -10px; /* Adjust this value to move the spin button slightly upward */
+        }
+
+        .win-message.small-win {
+            color: #4ecdc4;
+            text-shadow: 0 0 6px #4ecdc4;
+        }
+
+        @keyframes bigWinAnimation {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+
+        .payouts {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .payouts h3 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+        }
+
+        .payout-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .payout-item {
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .slot-machine {
+                padding: 20px;
+                max-width: 400px;
+                width: 90%;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .reels {
+                gap: 10px;
+            }
+
+            .reel {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .info-panel {
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .info-item {
+                min-width: 100px;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .bet-buttons {
+                gap: 5px;
+            }
+
+            .bet-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .spin-btn, .auto-spin-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+
+            .payout-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slot-machine {
+                padding: 15px;
+                max-width: 300px;
+                width: 85%;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .reels {
+                gap: 8px;
+            }
+
+            .reel {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .info-item {
+                min-width: 90px;
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .bet-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .spin-btn, .auto-spin-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .payouts {
+                padding: 15px;
+            }
+
+            .payout-item {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="loader-icon">7 7 7</div>
+        <div class="loader-bar"></div>
+    </div>
+    
+    <div class="casino-background"></div>
+    
+    <div class="slot-machine" id="slotMachine">
+        <h1 class="title">🎰 CASINO 777 🎰</h1>
+        
+        <div class="reels-container">
+            <div class="reels">
+                <div class="reel" id="reel1">🍒</div>
+                <div class="reel" id="reel2">🍒</div>
+                <div class="reel" id="reel3">🍒</div>
+            </div>
+            
+            <div class="win-message" id="winMessage"></div>
+        </div>
+        
+        <div class="controls">
+            <div class="info-panel">
+                <div class="info-item">
+                    Credits: <span id="credits">1000</span>
+                </div>
+                <div class="info-item">
+                    Bet: <span id="currentBet">10</span>
+                </div>
+                <div class="info-item">
+                    Win: <span id="lastWin">0</span>
+                </div>
+            </div>
+            
+            <div class="bet-controls">
+                <div class="bet-buttons">
+                    <button class="bet-btn" data-bet="5">5</button>
+                    <button class="bet-btn active" data-bet="10">10</button>
+                    <button class="bet-btn" data-bet="25">25</button>
+                    <button class="bet-btn" data-bet="50">50</button>
+                    <button class="bet-btn" data-bet="100">100</button>
+                </div>
+                <div class="button-group">
+                    <button class="spin-btn" id="spinBtn">SPIN</button>
+                    <button class="auto-spin-btn" id="autoSpinBtn">AUTO SPIN</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="payouts">
+            <h3>💰 PAYOUTS 💰</h3>
+            <div class="payout-list">
+                <div class="payout-item">
+                    <span>🍒🍒🍒</span>
+                    <span>×10</span>
+                </div>
+                <div class="payout-item">
+                    <span>🍋🍋🍋</span>
+                    <span>×15</span>
+                </div>
+                <div class="payout-item">
+                    <span>🍊🍊🍊</span>
+                    <span>×20</span>
+                </div>
+                <div class="payout-item">
+                    <span>🍇🍇🍇</span>
+                    <span>×25</span>
+                </div>
+                <div class="payout-item">
+                    <span>⭐⭐⭐</span>
+                    <span>×50</span>
+                </div>
+                <div class="payout-item">
+                    <span>💎💎💎</span>
+                    <span>×100</span>
+                </div>
+                <div class="payout-item">
+                    <span>7️⃣7️⃣7️⃣</span>
+                    <span>×500</span>
+                </div>
+                <div class="payout-item">
+                    <span>🎰🎰🎰</span>
+                    <span>×1000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SlotMachine {
+            constructor() {
+                this.symbols = ['🍒', '🍋', '🍊', '🍇', '⭐', '💎', '7️⃣', '🎰'];
+                this.payouts = {
+                    '🍒': 10,
+                    '🍋': 15,
+                    '🍊': 20,
+                    '🍇': 25,
+                    '⭐': 50,
+                    '💎': 100,
+                    '7️⃣': 500,
+                    '🎰': 1000
+                };
+                
+                this.credits = 1000;
+                this.currentBet = 10;
+                this.lastWin = 0;
+                this.isSpinning = false;
+                this.isAutoSpinning = false;
+                
+                this.reels = [
+                    document.getElementById('reel1'),
+                    document.getElementById('reel2'),
+                    document.getElementById('reel3')
+                ];
+                
+                this.creditsDisplay = document.getElementById('credits');
+                this.betDisplay = document.getElementById('currentBet');
+                this.winDisplay = document.getElementById('lastWin');
+                this.winMessage = document.getElementById('winMessage');
+                this.spinBtn = document.getElementById('spinBtn');
+                this.autoSpinBtn = document.getElementById('autoSpinBtn');
+                
+                this.initializeEventListeners();
+                this.updateDisplay();
+            }
+            
+            initializeEventListeners() {
+                document.querySelectorAll('.bet-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (this.isSpinning) return;
+                        
+                        document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        this.currentBet = parseInt(e.target.dataset.bet);
+                        this.updateDisplay();
+                    });
+                });
+                
+                this.spinBtn.addEventListener('click', () => {
+                    this.spin();
+                });
+                
+                this.autoSpinBtn.addEventListener('click', () => {
+                    this.toggleAutoSpin();
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' && !this.isSpinning && !this.isAutoSpinning) {
+                        e.preventDefault();
+                        this.spin();
+                    } else if (e.code === 'KeyA' && !this.isSpinning) {
+                        e.preventDefault();
+                        this.toggleAutoSpin();
+                    }
+                });
+            }
+            
+            updateDisplay() {
+                this.creditsDisplay.textContent = this.credits;
+                this.betDisplay.textContent = this.currentBet;
+                this.winDisplay.textContent = this.lastWin;
+                
+                this.spinBtn.disabled = this.credits < this.currentBet || this.isSpinning;
+                this.autoSpinBtn.disabled = this.credits < this.currentBet;
+                this.autoSpinBtn.textContent = this.isAutoSpinning ? 'STOP AUTO' : 'AUTO SPIN';
+                this.autoSpinBtn.classList.toggle('active', this.isAutoSpinning);
+            }
+            
+            getRandomSymbol() {
+                return this.symbols[Math.floor(Math.random() * this.symbols.length)];
+            }
+            
+            async spin() {
+                if (this.isSpinning || this.credits < this.currentBet) return;
+                
+                this.isSpinning = true;
+                this.credits -= this.currentBet;
+                this.lastWin = 0;
+                this.winMessage.textContent = '';
+                this.winMessage.className = 'win-message';
+                
+                this.reels.forEach(reel => reel.classList.remove('winning'));
+                
+                this.updateDisplay();
+                
+                this.reels.forEach(reel => reel.classList.add('spinning'));
+                
+                const spinDurations = [1200, 1600, 2000];
+                const results = [];
+                
+                for (let i = 0; i < 3; i++) {
+                    await new Promise(resolve => {
+                        let spinCount = 0;
+                        const maxSpins = spinDurations[i] / 80;
+                        
+                        const spinInterval = setInterval(() => {
+                            this.reels[i].textContent = this.getRandomSymbol();
+                            spinCount++;
+                            
+                            if (spinCount >= maxSpins) {
+                                clearInterval(spinInterval);
+                                this.reels[i].classList.remove('spinning');
+                                results[i] = this.reels[i].textContent;
+                                resolve();
+                            }
+                        }, 80);
+                    });
+                }
+                
+                await this.checkWin(results);
+                this.isSpinning = false;
+                this.updateDisplay();
+                
+                if (this.isAutoSpinning && this.credits >= this.currentBet) {
+                    setTimeout(() => this.spin(), 1000);
+                }
+            }
+            
+            toggleAutoSpin() {
+                if (this.isSpinning) return;
+                this.isAutoSpinning = !this.isAutoSpinning;
+                this.updateDisplay();
+                
+                if (this.isAutoSpinning && this.credits >= this.currentBet) {
+                    this.spin();
+                }
+            }
+            
+            async checkWin(results) {
+                const [reel1, reel2, reel3] = results;
+                
+                if (reel1 === reel2 && reel2 === reel3) {
+                    const winAmount = this.currentBet * this.payouts[reel1];
+                    this.lastWin = winAmount;
+                    this.credits += winAmount;
+                    
+                    this.reels.forEach(reel => reel.classList.add('winning'));
+                    
+                    if (winAmount >= this.currentBet * 50) {
+                        this.winMessage.textContent = `🎉 JACKPOT! +${winAmount} 🎉`;
+                        this.winMessage.className = 'win-message big-win';
+                    } else {
+                        this.winMessage.textContent = `🎊 WIN! +${winAmount} 🎊`;
+                        this.winMessage.className = 'win-message small-win';
+                    }
+                    
+                    await this.playWinSound();
+                    
+                } else {
+                    this.winMessage.textContent = 'Try again!';
+                    this.winMessage.className = 'win-message';
+                }
+                
+                if (this.credits < Math.min(...Array.from(document.querySelectorAll('.bet-btn')).map(btn => parseInt(btn.dataset.bet)))) {
+                    this.isAutoSpinning = false;
+                    setTimeout(() => {
+                        if (confirm('Game Over! You\'re out of credits. Would you like to restart with 1000 credits?')) {
+                            this.credits = 1000;
+                            this.updateDisplay();
+                        }
+                    }, 2000);
+                }
+            }
+            
+            async playWinSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.3);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                } catch (e) {
+                    console.log('Audio not available');
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('loader');
+            const slotMachine = document.getElementById('slotMachine');
+            
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                slotMachine.classList.add('loaded');
+                new SlotMachine();
+            }, 1500);
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: fixed;
+                    width: 4px;
+                    height: 4px;
+                    background: #ffd700;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: -1;
+                    left: ${Math.random() * 100}vw;
+                    top: 100vh;
+                    animation: floatUp ${3 + Math.random() * 4}s linear forwards;
+                    box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+                `;
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 7000);
+            }
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes floatUp {
+                    to {
+                        transform: translateY(-100vh) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setInterval(createParticle, 1500);
+        });
+    </script>
+</body>
+</html>
